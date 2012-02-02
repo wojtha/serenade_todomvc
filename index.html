@@ -29,7 +29,9 @@
 
         #todo-stats
           - if @completedCount
-            button[class="some-completed" type="button" event:click=clear] "Clear " @completedCount " completed item"
+            button[class="some-completed" type="button" event:click=clear]
+              "Clear " @completedCount " completed item"
+
           @incompleteCount " items left"
     </script>
 
