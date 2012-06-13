@@ -1,5 +1,5 @@
 (function() {
-  var Application, ApplicationController, Todo, TodoController,
+  var Application, ApplicationController, Todo,
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
@@ -22,20 +22,20 @@
 
     Application.property('doneTodos', {
       get: function() {
-        return this.get('todos').select(function(item) {
+        return this.get('todos').filter(function(item) {
           return item.get('done');
         });
       },
-      dependsOn: ['todos', 'todos.done']
+      dependsOn: 'todos:done'
     });
 
     Application.property('incompleteTodos', {
       get: function() {
-        return this.get('todos').select(function(item) {
+        return this.get('todos').filter(function(item) {
           return !item.get('done');
         });
       },
-      dependsOn: ['todos', 'todos.done']
+      dependsOn: 'todos:done'
     });
 
     Application.property('completedCount', {
@@ -103,7 +103,7 @@
     });
 
     Todo.prototype.toggleDone = function() {
-      return this.set('done', !this.get('done'));
+      return this.set('done', !this.done);
     };
 
     return Todo;
@@ -112,7 +112,9 @@
 
   ApplicationController = (function() {
 
-    function ApplicationController() {}
+    function ApplicationController(model) {
+      this.model = model;
+    }
 
     ApplicationController.prototype.setTodoDone = function() {
       if (this.model.get('allCompleted')) {
@@ -126,8 +128,8 @@
       return this.model.set('todos', this.model.get('incompleteTodos'));
     };
 
-    ApplicationController.prototype.setTitle = function(event) {
-      return this.title = event.target.value;
+    ApplicationController.prototype.setTitle = function(app, target) {
+      return this.title = target.value;
     };
 
     ApplicationController.prototype.addNew = function() {
@@ -138,36 +140,18 @@
       }
     };
 
+    ApplicationController.prototype.toggleDone = function(todo) {
+      return todo.toggleDone();
+    };
+
     return ApplicationController;
 
   })();
 
-  TodoController = (function() {
-
-    function TodoController() {}
-
-    TodoController.prototype.toggleDone = function() {
-      return this.model.toggleDone();
-    };
-
-    return TodoController;
-
-  })();
-
-  Serenade.controller('app', ApplicationController);
-
-  Serenade.controller('todo', TodoController);
-
   window.onload = function() {
-    var element, script, _i, _len, _ref;
-    _ref = document.getElementsByTagName('script');
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      script = _ref[_i];
-      if (script.getAttribute('type') === 'text/x-serenade') {
-        Serenade.view(script.getAttribute('id'), script.innerText.replace(/^\s*/, ''));
-      }
-    }
-    element = Serenade.render('app', Application.find(1));
+    var element, script;
+    script = document.getElementById("app");
+    element = Serenade.view(script.innerText).render(Application.find(1), ApplicationController);
     return document.getElementById('todoapp').appendChild(element);
   };
 

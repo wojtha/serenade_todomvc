@@ -3,11 +3,11 @@ class Application extends Serenade.Model
   @localStorage = true
 
   @property 'doneTodos',
-    get: -> @get('todos').select((item) -> item.get('done'))
-    dependsOn: ['todos', 'todos.done']
+    get: -> @get('todos').filter((item) -> item.get('done'))
+    dependsOn: 'todos:done'
   @property 'incompleteTodos',
-    get: -> @get('todos').select((item) -> not item.get('done'))
-    dependsOn: ['todos', 'todos.done']
+    get: -> @get('todos').filter((item) -> not item.get('done'))
+    dependsOn: 'todos:done'
   @property 'completedCount',
     get: -> @get('doneTodos').length
     format: (val) -> val or "0"
@@ -28,9 +28,10 @@ class Todo extends Serenade.Model
   @property 'status', dependsOn: 'done', get: -> if @get('done') then 'done' else 'active'
   @property 'title', serialize: true
 
-  toggleDone: -> @set('done', !@get('done'))
+  toggleDone: -> @set('done', not @done)
 
 class ApplicationController
+  constructor: (@model) ->
   setTodoDone: ->
     if @model.get('allCompleted')
       @model.setTodoDone(false)
@@ -38,24 +39,13 @@ class ApplicationController
       @model.setTodoDone(true)
   clear: ->
     @model.set('todos', @model.get('incompleteTodos'))
-  setTitle: (event) ->
-    @title = event.target.value
+  setTitle: (app, target) ->
+    @title = target.value
   addNew: ->
     @model.get('todos').push(title: @title) if @title
-
-class TodoController
-  toggleDone: -> @model.toggleDone()
-
-Serenade.controller('app', ApplicationController)
-Serenade.controller('todo', TodoController)
+  toggleDone: (todo) -> todo.toggleDone()
 
 window.onload = ->
-
-  # boring boilerplate to grab template from html file
-  for script in document.getElementsByTagName('script')
-    if script.getAttribute('type') is 'text/x-serenade'
-      Serenade.view script.getAttribute('id'), script.innerText.replace(/^\s*/, '')
-
-  # render and insert
-  element = Serenade.render('app', Application.find(1))
+  script = document.getElementById("app")
+  element = Serenade.view(script.innerText).render(Application.find(1), ApplicationController)
   document.getElementById('todoapp').appendChild(element)

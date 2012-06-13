@@ -25,7 +25,10 @@
 
         ul#todo-list
           - collection @todos
-            - view "todo"
+            li[class=@status]
+              label
+                input[type="checkbox" checked=@done event:click=toggleDone]
+                @title
 
         #todo-stats
           - if @completedCount
@@ -33,13 +36,6 @@
               "Clear " @completedCount " completed item"
 
           @incompleteCount " items left"
-    </script>
-
-    <script type="text/x-serenade" id="todo">
-      li[class=@status]
-        label
-          input[type="checkbox" checked=@done event:click=toggleDone]
-          @title
     </script>
   </head>
   <body>
@@ -55,7 +51,7 @@
       Jonas Nicklas
     </div>
 
-    <script src="js/serenade.0.1.1.min.js"></script>
+    <script src="js/serenade.js"></script>
     <script src="js/app.js"></script>
   </body>
 </html>
