@@ -44,7 +44,18 @@ class ApplicationController
     @app.todos.push(title: @title) if @title
   toggleDone: (target, todo) -> todo.toggleDone()
 
+class Persistence
+  @store: (key, value) ->
+    localStorage.setItem(key, value)
+  @retrieve: (key) ->
+    value = localStorage.getItem(key)
+    JSON.parse(value) if value
+
 window.onload = ->
+  app_id = 1
+  localData = Persistence.retrieve("SerenadeTodoApp#{app_id}")
+  todoApp = if localData then new Application(localData) else new Application.find(app_id)
+  todoApp.changed.bind -> Persistence.store("SerenadeTodoApp#{@id}", @)
   script = document.getElementById('app')
-  element = Serenade.view(script.innerText).render(Application.find(1), ApplicationController)
+  element = Serenade.view(script.innerText).render(todoApp, ApplicationController)
   document.getElementById('todoapp').appendChild(element)
