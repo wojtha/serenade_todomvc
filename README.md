@@ -1,6 +1,6 @@
 # todomvc app using Serenade.js
 
-This is the [todomvc] app written with [Serenade.js].
+This is the [todomvc] app written with [Serenade.js] v0.5.0.
 
 The app is written in CoffeeScript, see `./js/app.coffee`.
 
